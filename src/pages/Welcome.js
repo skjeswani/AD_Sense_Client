@@ -1,7 +1,9 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { useEffect } from "react";
 import "./Welcome.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { auth, provider } from "../config";
+import { signInWithPopup } from "firebase/auth";
 
 const Text = ({ value }) => (
   <div className="welcome">
@@ -18,6 +20,21 @@ const Text = ({ value }) => (
 );
 
 const Welcome = () => {
+  const [value, setValue] = useState("");
+  const history = useNavigate();
+
+  const handleSubmit = () => {
+    signInWithPopup(auth, provider).then((data) => {
+      setValue(data.user.displayName);
+      localStorage.setItem("user", data.user.displayName);
+      history("/admission");
+    });
+  };
+
+  useEffect(() => {
+    setValue(localStorage.getItem("user"));
+  });
+
   const myRef = React.createRef();
 
   const unmount = useCallback(() => {
@@ -43,10 +60,11 @@ const Welcome = () => {
       <Text value="THAT" />
       <Text value="CREATE" />
       <Text value="IMPACT" />
+
       <Link
-        onClick={unmount}
+        onClick={handleSubmit}
+        // to={"/admission"}
         ref={Welcome.myRef}
-        to="/admission"
         className="begin"
       >
         Begin
